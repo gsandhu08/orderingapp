@@ -3,13 +3,14 @@ from rest_framework.response import Response
 from rest_framework.serializers import Serializer
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
-from .models import MenuItems, RestaurantList, Customer, Order
-from .serializers import ItemsSerializer, OrderSerializer_create, RestListSerializer,RestDetailSerializer,RestDetailSerializer_create
-from .serializers import CustomerSerializer, OrderSerializer
+from .models import MenuItems, RestaurantList, Customer, Order, RestMenuItems
+from .serializers import  RestListSerializer,RestDetailSerializer,RestDetailSerializer_create
+from .serializers import CustomerSerializer
 import sys
 from datetime import datetime
 from django.contrib.auth.models import User
 from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework.decorators import action
 SECRET_KEY = 'django-insecure-zg1!oim9keb0^a_^_^f8ygn*@@p&q36co%gabw)fx)#w+78d8)'
 
 # Create your views here.
@@ -94,9 +95,14 @@ class RestaurantDetailView(ModelViewSet):
         except Exception as e:
             return Response(str(e))
 
-class MenuItemView(ModelViewSet):
-    queryset = MenuItems.objects.all()
-    serializer_class = ItemsSerializer
+# class MenuItemView(ModelViewSet):
+#     queryset = RestMenuItems.objects.all()
+#     serializer_class = RestItemsSerializer
+#     def create(self,request):
+#         email = request.user.email
+#         restaurantid= RestaurantList.objects.get(email=email)
+#         restaurantid= restaurantid.id
+
     
 
 class CustomerView(ModelViewSet):
@@ -149,23 +155,23 @@ class CustomerView(ModelViewSet):
             return Response(str(e))
 
 
-class OrderView(ModelViewSet):
-    queryset = Order.objects.all()
-    serializer_class = OrderSerializer
+# class OrderView(ModelViewSet):
+#     queryset = Order.objects.all()
+#     serializer_class = OrderSerializer
 
-    def create(self,request):
-        try:
-            rawData = request.data
-            serializer = OrderSerializer_create(data=rawData)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            data = {'status': True,
-                    'data': serializer.data,
-                    'error':None
-            }
-            return Response(data)
-        except Exception as e:
-            return Response(str(e))
+#     def create(self,request):
+#         try:
+#             rawData = request.data
+#             serializer = OrderSerializer_create(data=rawData)
+#             serializer.is_valid(raise_exception=True)
+#             serializer.save()
+#             data = {'status': True,
+#                     'data': serializer.data,
+#                     'error':None
+#             }
+#             return Response(data)
+#         except Exception as e:
+#             return Response(str(e))
 
 
 class GetOtpView(APIView):
@@ -198,3 +204,51 @@ class VerifyOtpView(APIView):
                     'token': token
             }
         return Response(data)
+
+class RestMenuItemsView(ModelViewSet):
+    queryset = RestaurantList.objects.all()
+    serializer_class = RestDetailSerializer
+    def retrieve(self,request, *args, **kwargs):
+        try:
+            # data = RestaurantList.objects.filter(id=request.data.get('id'))
+            data = self.get_object()
+            data_serializer = RestDetailSerializer(data)
+            items = data_serializer.data.get('menu_list')
+            data ={
+                    'status':True,
+                    'data': items,
+                    'error':None
+                    }
+            return Response(data)
+        except Exception as e:
+            return Response(str(e))
+
+
+class LoginView(ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = Serializer
+    def create(self,request):
+        try:
+            data = request.data
+            user = User.objects.create_user(username=data.get('username'),password=data.get('password'))
+            user.save()
+            return Response({'status':'user created'})
+        except Exception as e:
+            return Response(str(e))
+
+    @action(detail=False, methods=['POST'])
+    def restLogin(self,request):
+        try:
+            data = request.data
+    
+            token = TokenObtainPairView.as_view()(request._request).data
+            data = {
+                'status': True,
+                'token': token,
+                'error': None
+                }
+            return Response(data)
+        except Exception as e:
+            return Response(str(e))
+
+    

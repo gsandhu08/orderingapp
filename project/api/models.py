@@ -18,7 +18,7 @@ class RestaurantList(models.Model):
     disable = models.BooleanField(default=False)
     created_date = models.DateTimeField(auto_now_add=True,editable=False)
     updated_date = models.DateTimeField(auto_now=True,editable=True)
-    menu_list = models.TextField(default=None,null=True)
+    
 
 class MenuItems(models.Model):
     name = models.CharField(max_length=30)
@@ -31,6 +31,20 @@ class MenuItems(models.Model):
     created_date = models.DateTimeField(auto_now_add=True,editable=False)
     updated_date = models.DateTimeField(auto_now=True, editable=True)
     is_available = models.BooleanField()
+
+class RestMenuItems(models.Model):
+    name = models.CharField(max_length=30)
+    category = models.CharField(max_length=50)
+    price = models.IntegerField()
+    description = models.TextField()
+    picture = models.ImageField()
+    prep_time = models.IntegerField()
+    is_veg = models.BooleanField()
+    created_date = models.DateTimeField(auto_now_add=True,editable=False)
+    updated_date = models.DateTimeField(auto_now=True, editable=True)
+    is_available = models.BooleanField()
+    restaurant = models.ForeignKey(RestaurantList, on_delete=models.DO_NOTHING)
+
 
 gender_choices = (('M','Male'),('F','Female'),)
 class Customer(models.Model):
@@ -55,3 +69,5 @@ class Order(models.Model):
     list_of_items = models.TextField(default=None,null=True)
 
 
+
+    

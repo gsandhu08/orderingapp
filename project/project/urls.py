@@ -15,20 +15,23 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from api.views import CustomerView, RestaurantListView, RestaurantDetailView, MenuItemView
-from api.views import OrderView, GetOtpView, VerifyOtpView
+from api.views import CustomerView, RestaurantListView, RestaurantDetailView
+from api.views import  GetOtpView, VerifyOtpView, RestMenuItemsView, LoginView
 from rest_framework.routers import SimpleRouter
 from django.urls.conf import include
 
 router = SimpleRouter()
-router.register('items', MenuItemView)
+# router.register('items', MenuItemView)
 router.register('customer', CustomerView)
 router.register('restdetail', RestaurantDetailView)
-router.register('order', OrderView)
+# router.register('order', OrderView)
+router.register('menuItems', RestMenuItemsView)
+router.register('login', LoginView)
 
 urlpatterns = [
     path('',include(router.urls)),
     path('restlist/', RestaurantListView.as_view()),
     path('getotp/', GetOtpView.as_view()),
     path('verifyotp/', VerifyOtpView.as_view()),
+    
 ]
